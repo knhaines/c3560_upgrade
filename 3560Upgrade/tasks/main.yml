@@ -1,0 +1,59 @@
+---
+- name: Install TFTP server
+  apt:
+    name: tftpd-hpa
+    state: present
+  become: yes
+
+- name: Ensure TFTP server is running
+  service:
+    name: tftpd-hpa
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Check if the file exists on the remote device
+  cisco.ios.ios_command:
+    commands:
+      - "dir flash:{{ new_file }}"
+  register: check_file
+  failed_when: false  # Prevent task from failing if the file does not exist
+
+- name: Debug the structure of check_file variable
+  debug:
+    var: check_file
+
+- name: Set file_exists variable based on the output (msg or stdout)
+  set_fact:
+    file_exists: >-
+      {{
+        'No such file' not in check_file.msg
+        if 'msg' in check_file else
+        'No such file' not in check_file.stdout[0]
+      }}
+
+- name: Debug the value of file_exists
+  debug:
+    msg: "The value of file_exists is {{ file_exists }}"
+
+- name: Copy IOS image via TFTP if not already present
+  cisco.ios.ios_command:
+    commands:
+      - command: "copy tftp://{{ tftp_server_ip }}/{{ new_file }} flash:{{ new_file }}"
+        prompt:
+          - 'Address or name of remote host \[.*\]\?'
+          - 'Source filename \[.*\]\?'
+          - 'Destination filename \[.*\]\?'
+        answer:
+          - "{{ tftp_server_ip }}"
+          - "{{ new_file }}"
+          - "{{ new_file }}"
+  when: not file_exists
+  vars:
+    ansible_command_timeout: 900
+
+- name: Verify the IOS image on the Cisco switch
+  cisco.ios.ios_command:
+    commands:
+      - "dir flash:{{ new_file }}"
+  register: dir_output

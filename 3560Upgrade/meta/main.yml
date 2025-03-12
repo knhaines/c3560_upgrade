@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: Kimberly Haines
+  description: Role to upgrade Cisco 3560 IOS
+  license: MIT
+  min_ansible_version: 2.9
+  platforms:
+    - name: any
+  galaxy_tags: []
+
+dependencies: []

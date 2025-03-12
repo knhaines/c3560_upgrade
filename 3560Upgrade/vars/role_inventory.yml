@@ -1,0 +1,9 @@
+---
+new_version: 150-2.SE11
+new_file: "~/cisco_iosxe/images/c3560-ipbasek9-mz.{{ new_version }}.bin"
+tftp_server_ip: "172.16.6.10"
+cisco_switch_ip: "172.16.6.55"
+cisco_switch_username: "admin"
+cisco_switch_password: "WWTwwt1!"
+cisco_switch_enable_password: "enable_password"
+command_timeout: 120  # Increased timeout value
